@@ -1,0 +1,9 @@
+{
+    "date-format": "%d %B %Y",
+    "keywords": {
+        "project-description": "Stupid packet parser",
+        "organization": "UHasselt/KULeuven - FIIW",
+        "author": "Lowie Deferme"
+    },
+    "shebang-by-default": true
+}

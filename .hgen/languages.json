@@ -1,0 +1,60 @@
+{
+    "languages": [
+        {
+            "language": "rust",
+            "line-comment": "//",
+            "file-extension": {
+                "source": ".rs"
+            }
+        },
+        {
+            "language": "c",
+            "line-comment": "//",
+            "file-extension": {
+                "source": ".c",
+                "header": ".h"
+            }
+        },
+        {
+            "language": "c++",
+            "line-comment": "//",
+            "file-extension": {
+                "source": ".cpp",
+                "header": ".h"
+            }
+        },
+        {
+            "language": "python",
+            "line-comment": "#",
+            "file-extension": {
+                "source": ".py"
+            },
+            "shebang": "#!/usr/bin/env python3"
+        },
+        {
+            "language": "verilog",
+            "line-comment": "//",
+            "file-extension": {
+                "source": ".v",
+                "header": ".vh",
+                "testbench": ".vt"
+            }
+        },
+        {
+            "language": "systemverilog",
+            "line-comment": "//",
+            "file-extension": {
+                "source": ".sv",
+                "header": ".svh"
+            }
+        },
+        {
+            "language": "vhdl",
+            "line-comment": "--",
+            "file-extension": {
+                "source": ".vhd",
+                "testbench": ".vht"
+            }
+        }
+    ]
+}
