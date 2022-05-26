@@ -94,7 +94,7 @@ begin
     -- Fill md_out by concatenating metadata per byte
     with fsm_state select md_out_i <=
         (others => '0') when R,
-        md_vec(0) & md_vec(1) & md_vec(2) & md_vec(3) when P;
+        md_in_i & md_vec(0) & md_vec(1) & md_vec(2) & md_vec(3) when P;
         
     -----------------------------------------------------------------------------
     -- Finite state machine

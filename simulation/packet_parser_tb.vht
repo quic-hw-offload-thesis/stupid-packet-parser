@@ -27,7 +27,7 @@ architecture behavioural of packet_parser_tb is
 
     -- Constant to hold metadata width
     constant META_DATA_IN_WIDTH : integer := 3;
-    constant META_DATA_OUT_WIDTH : integer := 16;
+    constant META_DATA_OUT_WIDTH : integer := 16 + 3;
 
     -- Define (meta)data input file
     constant FNAME_DATA : string := "C:/Users/ldefe/Documents/IIW/MP/project/quic-hw-offload/packet_parser/resources/data_in.dat";
