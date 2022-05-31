@@ -46,12 +46,12 @@ architecture behavioural of packet_parser is
     signal md_in_i : std_logic_vector(G_MD_IN_WIDTH-1 downto 0);
     signal md_out_i : std_logic_vector(G_MD_OUT_WIDTH-1 downto 0);
 
-    -- Fsm states
-    type T_fsm_state IS (R, P);  -- define states (Ready, Parsing,)
-    signal fsm_state : T_fsm_state; -- fsm state signal
-
     -- Byte counter
     signal byte_ctr : std_logic_vector(11 downto 0); -- Maximum ethernet frame size is 1518 bytes which can be represented in 11 bits (no vlan, no jumbo frames)
+
+    -- Input metadata
+    signal data_last : std_logic;
+    signal data_valid : std_logic;
 
     -- Metadata definitions (there are C_DATA_BYTES bytes in C_DATA_WIDTH)
     type T_proto_vec is array (C_DATA_BYTES-1 downto 0) of std_logic_vector(C_MS_PROTO-1 downto 0);
@@ -73,6 +73,9 @@ begin
     md_in_i <= md_in;
     md_out <= md_out_i;
 
+    data_valid <= md_in_i(C_MO_DATA_VALID);
+    data_last <= md_in_i(C_MO_DATA_LAST);
+
     -----------------------------------------------------------------------------
     -- Define metadata per byte
     -----------------------------------------------------------------------------
@@ -88,28 +91,11 @@ begin
 
     -- Concatenate metadata bits per byte
     G_MD_F: for i in 0 to C_DATA_BYTES-1 generate
-            md_vec(i) <= proto_vec(i) & dcid_vec(i);           
+            md_vec(i) <= proto_vec(i) & dcid_vec(i);        
     end generate G_MD_F;
 
     -- Fill md_out by concatenating metadata per byte
-    with fsm_state select md_out_i <=
-        (others => '0') when R,
-        md_in_i & md_vec(0) & md_vec(1) & md_vec(2) & md_vec(3) when P;
-        
-    -----------------------------------------------------------------------------
-    -- Finite state machine
-    -----------------------------------------------------------------------------
-    P_FSM : process(clk_i, reset_i)
-    begin
-        if reset_i = '1' then
-            fsm_state <= R;
-        elsif rising_edge(clk_i) then
-            case fsm_state is
-                when R => fsm_state <= P; -- Todo: Only go to P when data valid
-                when P => fsm_state <= P; -- Fixme: F is never reached
-            end case;
-        end if;
-    end process ; -- P_FSM
+    md_out_i <= md_vec(0) & md_vec(1) & md_vec(2) & md_vec(3) & md_in_i;
 
     -----------------------------------------------------------------------------
     -- Data path
@@ -124,10 +110,16 @@ begin
         if reset_i = '1' then
             byte_ctr <= (others => '0');
         elsif rising_edge(clk_i) then
-            case fsm_state is
-                when R => byte_ctr <= (others => '0');
-                when P => byte_ctr <= std_logic_vector(unsigned(byte_ctr) + 4 );
-            end case;
+            if data_valid = '0' then
+                -- Hold when (data_valid = '0' and data_last = x)
+                byte_ctr <= byte_ctr;
+            elsif data_last = '0' then
+                -- Increment when (data_valid = '1' and data_last = '0')
+                byte_ctr <= std_logic_vector(unsigned(byte_ctr) + 4 );
+            else
+                -- Reset when (data_valid = '1' and data_last = '1')               
+                byte_ctr <= (others => '0'); 
+            end if;
         end if;
     end process ; -- P_BYTE_CLK
     
