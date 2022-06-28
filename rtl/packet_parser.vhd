@@ -52,6 +52,7 @@ architecture behavioural of packet_parser is
     -- Input metadata
     signal data_last : std_logic;
     signal data_valid : std_logic;
+    signal strobe : std_logic_vector(C_MS_STROBE-1 downto 0);
 
     -- Metadata definitions (there are C_DATA_BYTES bytes in C_DATA_WIDTH)
     type T_proto_vec is array (C_DATA_BYTES-1 downto 0) of std_logic_vector(C_MS_PROTO-1 downto 0);
@@ -75,6 +76,7 @@ begin
 
     data_valid <= md_in_i(C_MO_DATA_VALID);
     data_last <= md_in_i(C_MO_DATA_LAST);
+    strobe <= md_in_i(C_MO_STROBE+C_MS_STROBE-1 downto C_MO_STROBE);
 
     -----------------------------------------------------------------------------
     -- Define metadata per byte
@@ -85,7 +87,7 @@ begin
         proto_vec(i) <= C_PROTO_ETHERNET when (unsigned(byte_ctr) + i) < 14 else
                         C_PROTO_IP when (unsigned(byte_ctr) + i) < 34 else
                         C_PROTO_UDP when (unsigned(byte_ctr) + i) < 42 else
-                        C_PROTO_1RTT_QUIC; -- Fixme: When should protocol be C_PROTO_UNKNOWN or C_PROTO_PADDING?
+                        C_PROTO_1RTT_QUIC when strobe(3-i) = '1' else C_PROTO_PADDING; -- Fixme: When should protocol be C_PROTO_UNKNOWN or C_PROTO_PADDING?
         dcid_vec(i) <= '1' when ((unsigned(byte_ctr) + i) >= 43) and ((unsigned(byte_ctr) + i) < 63) else '0';
     end generate G_MD_D;
 
